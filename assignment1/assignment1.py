@@ -5,14 +5,13 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-
 __all__ = ['learn_perceptron',
            'update_weights',
            'eval_perceptron',
            'plot_perceptron']
 
 
-def learn_perceptron(neg_examples_nobias, pos_examples_nobias, w_init, w_gen_feas, learn_rate=1/2.0,
+def learn_perceptron(neg_examples_nobias, pos_examples_nobias, w_init, w_gen_feas,
                      pause=False):
     """Learns the weights of a perceptron for a 2-dimensional dataset and plots
     the perceptron at each iteration where an iteration is defined as one
@@ -39,11 +38,11 @@ def learn_perceptron(neg_examples_nobias, pos_examples_nobias, w_init, w_gen_fea
     pos_examples = np.hstack((pos_examples_nobias, np.ones((len(pos_examples_nobias), 1))))
 
     if np.size(w_init):
-        w = np.random.rand(3,1)
+        w = np.random.rand(3, 1)
     else:
         w = w_init
 
-    if np.size(w_gen_feas):
+    if not np.size(w_gen_feas):
         w_gen_feas = []
 
     # Find the data points that the perceptron has incorrectly classified
@@ -66,7 +65,7 @@ def learn_perceptron(neg_examples_nobias, pos_examples_nobias, w_init, w_gen_fea
         iter_ = iter_ + 1
 
         # Update weights of perceptron
-        w = update_weights(neg_examples, pos_examples, w, learn_rate=learn_rate)
+        w = update_weights(neg_examples, pos_examples, w)
 
         # If a generously feasible weight vetor exists, record the distance
         # to it from the current weight vector
@@ -97,7 +96,7 @@ def learn_perceptron(neg_examples_nobias, pos_examples_nobias, w_init, w_gen_fea
     return w
 
 
-def update_weights(neg_examples, pos_examples, w_current, learn_rate=1/2.0):
+def update_weights(neg_examples, pos_examples, w_current):
     """Updates the weights of the perceptron for incorrectly classified points
     using the perceptron update algorithm. This function makes one sweep over
     the dataset.
@@ -117,12 +116,12 @@ def update_weights(neg_examples, pos_examples, w_current, learn_rate=1/2.0):
         assert len(np.shape(sample)) == 1 and np.shape(w)[1] == 1
         activation = np.dot(sample, w)[0]
         if activation >= 0:
-            w += learn_rate * np.column_stack(sample).T * (0.0 - activation)
+            w += np.column_stack(sample).T * (0.0 - activation)
     for sample in pos_examples:
         assert len(np.shape(sample)) == 1 and np.shape(w)[1] == 1
         activation = np.dot(sample, w)[0]
         if activation < 0:
-            w += learn_rate * np.column_stack(sample).T * (1.0 - activation)
+            w += np.column_stack(sample).T * (1.0 - activation)
     return w
 
 
@@ -187,9 +186,9 @@ def plot_perceptron(neg_examples, pos_examples, mistakes0, mistakes1,
     neg_correct_ind = np.setdiff1d(range(len(neg_examples)), mistakes0)
     pos_correct_ind = np.setdiff1d(range(len(pos_examples)), mistakes1)
     assert all(m_idx not in set(neg_correct_ind) for m_idx in mistakes0) and \
-        all(m_idx not in set(pos_correct_ind) for m_idx in mistakes1)
+           all(m_idx not in set(pos_correct_ind) for m_idx in mistakes1)
 
-    plt.subplot(2,2,1)
+    plt.subplot(2, 2, 1)
     plt.hold(True)
     if np.size(neg_examples):
         plt.plot(neg_examples[neg_correct_ind][:, 0], neg_examples[neg_correct_ind][:, 1], 'og', markersize=10)
@@ -204,11 +203,11 @@ def plot_perceptron(neg_examples, pos_examples, mistakes0, mistakes1,
     plt.title('Perceptron Classifier')
     # In order to plot the decision line, we just need to get two points.
     plt.plot([-5, 5], [(-w[-1] + 5 * w[0]) / w[1], (-w[-1] - 5 * w[0]) / w[1]], 'k')
-    plt.xlim([-1,4])
-    plt.ylim([-2,2])
+    plt.xlim([-1, 4])
+    plt.ylim([-2, 2])
     plt.hold(False)
 
-    plt.subplot(2,2,2)
+    plt.subplot(2, 2, 2)
     plt.plot(range(len(num_err_history)), num_err_history)
     plt.xlim([-1, max(15, len(num_err_history))])
     plt.ylim([0, len(neg_examples) + len(pos_examples) + 1])
@@ -216,7 +215,7 @@ def plot_perceptron(neg_examples, pos_examples, mistakes0, mistakes1,
     plt.xlabel('Iteration')
     plt.ylabel('Number of errors')
 
-    plt.subplot(2,2,3)
+    plt.subplot(2, 2, 3)
     plt.plot(range(len(w_dist_history)), w_dist_history)
     plt.xlim([-1, max(15, len(num_err_history))])
     plt.ylim([0, 15])
@@ -224,3 +223,24 @@ def plot_perceptron(neg_examples, pos_examples, mistakes0, mistakes1,
     plt.xlabel('Iteration')
     plt.ylabel('Distance')
     plt.show()
+
+
+if __name__ == "__main__":
+    import matplotlib.pylab as pylab
+
+    pylab.rcParams['figure.figsize'] = 12, 8
+
+    import scipy.io
+    import os
+    import matplotlib.pyplot as plt
+
+    data_path = os.path.join(os.getcwd(), 'data/')
+    files = ['dataset%d' % i for i in range(1, 5)]
+
+    dataset_file = os.path.join(data_path, files[2])
+    data = scipy.io.loadmat(dataset_file)
+
+    w = learn_perceptron(data['neg_examples_nobias'],
+                         data['pos_examples_nobias'],
+                         data['w_init'],
+                         data['w_gen_feas'])

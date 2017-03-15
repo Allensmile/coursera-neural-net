@@ -2,7 +2,6 @@
 *.pyc
 
 # Matlab files
-*.mat
 *.m
 
 # Virtual Environment
