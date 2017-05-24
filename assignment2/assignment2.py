@@ -7,13 +7,14 @@
 Abstracts classifiers developed in the course into, a more pythonic Sklearn framework. And cleans up a lot of the
 given code.
 """
-import time
 import os
+import time
 
+import matplotlib.pylab as pylab
 import numpy as np
 from sklearn.base import BaseEstimator
 
-from courseraneuralnet.utility.utils import zip_safe, loadmat
+from utility.utils import zip_safe, loadmat
 
 __all__ = ['EvaluateCrossEntropy',
            'NeuralNet',
@@ -65,6 +66,7 @@ def load_data(data, batch_size=100):
 class NeuralNet(BaseEstimator):
     """Implements assignment 2 of Neural Networks for Machine Learning (Coursera) for Learning word representations.
     """
+
     def __init__(self,
                  epochs=1,
                  learning_rate=0.1,
@@ -335,6 +337,7 @@ class NeuralNet(BaseEstimator):
 class EvaluateCrossEntropy(object):
     """Computes cross entropy given classifier model.
     """
+
     def __init__(self, estimator):
         """Initialize EvaluateCrossEntropy instance.
         """
@@ -413,7 +416,7 @@ def display_nearest_words(word, model, k, vocab):
 
     # Sort by distance.
     order = np.argsort(distance)
-    order = order[1: k+1]  # The nearest word is the query word itself, skip that.
+    order = order[1: k + 1]  # The nearest word is the query word itself, skip that.
     for i in xrange(k):
         print 'Word\t: %s \nDistance: %.2f\n' % (vocab[order[i]], distance[order[i]])
 
@@ -421,10 +424,11 @@ def display_nearest_words(word, model, k, vocab):
 class A2Run(object):
     """Runs assignment 2.
     """
+
     def __init__(self):
         """Initialize data set and all test cases for assignment.
         """
-        data = loadmat(os.path.join(os.getcwd(), 'Data/data.mat'))
+        data = loadmat(os.path.join(os.getcwd(), 'data/data.mat'))
         self.data_sets = data['data']
         self.classifier = None
 
@@ -463,3 +467,39 @@ class A2Run(object):
                             numhid2=numhid2,
                             init_wt=init_wt,
                             validation_ce_after=validation_ce_after)
+
+
+# coding: utf-8
+
+# epochs:10
+#  - learning_rate:
+#         0.001:
+#             Validation CE: 4.379
+#         0.1:
+#             Validation CE: 2.625
+#         10.0:
+#             Validation CE: 4.584
+#  - Model A: 5 dimensional embedding, 100 dimensional hidden layer:
+#          Training CE: 2.980
+#  - Model B: 50 dimensional embedding, 10 dimensional hidden layer:
+#          Training CE 3.035
+#  - Model C: 50 dimensional embedding, 200 dimensional hidden layer:
+#          Training CE 2.559
+#  - Model D: 100 dimensional embedding, 5 dimensional hidden layer:
+#          Training CE 3.272
+if __name__ == "__main__":
+    pylab.rcParams['figure.figsize'] = 12, 8
+    a2 = A2Run()
+    classifier_params = dict(epochs=1,
+                             learning_rate=.10,
+                             momentum=0.9,
+                             numhid1=50,
+                             numhid2=200,
+                             init_wt=0.01,
+                             validation_ce_after=1000)
+    a2.a2_main(**classifier_params)
+    test_words = ['you', 'were', 'in', 'china']
+    a2.classifier.predict_next_word((test_words[0], test_words[1], test_words[2]), a2.data_sets['vocab'], 5)
+    display_nearest_words(test_words[1], a2.classifier, 10, a2.data_sets['vocab'])
+    word_distance(test_words[0], test_words[1], a2.classifier, a2.data_sets['vocab'])
+    word_distance('percent', 'dr.', a2.classifier, a2.data_sets['vocab'])
