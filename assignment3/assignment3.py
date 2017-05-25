@@ -410,59 +410,59 @@ a3 = A3Run()
 # In[ ]:
 
 # Q1
-# a3.a3_main(0, n_hid=0, n_iterations=0, lr_net=0, train_momentum=0, early_stopping=False, mini_batch_size=0)
-#
-# # In[ ]:
-#
-# # Q2
-# a3.a3_main(0, n_hid=10, n_iterations=70, lr_net=0.005, train_momentum=0.0, early_stopping=False,
-#            mini_batch_size=4)
-#
-# # In[ ]:
-#
-# # Q3
-# a3.a3_main(0, n_hid=10, n_iterations=70, lr_net=0.5, train_momentum=0.0, early_stopping=False,
-#            mini_batch_size=4)
-#
-# # Question 3-4
-# learning_rates = [0.002, 0.01, 0.05, 0.2, 1.0, 5.0, 20.0]
-# momentums = [0.0, 0.9]
-# for momentum in momentums:
-#     for learning_rate in learning_rates:
-#         print "Momentum and learning rate are ({0}, {1})".format(momentum, learning_rate)
-#         a3.a3_main(0, n_hid=10, n_iterations=70, lr_net=learning_rate, train_momentum=momentum,
-#                    early_stopping=False, mini_batch_size=4)
-#         print
-#
-# # In[ ]:
-#
-# ## Question 5
-# a3.a3_main(0, n_hid=200, n_iterations=1000, lr_net=0.35, train_momentum=0.9,
-#            early_stopping=False, mini_batch_size=100)
-#
-# # In[ ]:
-#
-# ## Question 6
-# a3.a3_main(0, n_hid=200, n_iterations=1000, lr_net=0.35, train_momentum=0.9,
-#            early_stopping=True, mini_batch_size=100)
+a3.a3_main(0, n_hid=0, n_iterations=0, lr_net=0, train_momentum=0, early_stopping=False, mini_batch_size=0)
 
 # In[ ]:
 
-## Question 7
-# for decay in [0, 0.0001, 0.001, 0.01, 1., 5]:
-#     print decay
-#     a3.a3_main(decay, n_hid=200, n_iterations=1000, lr_net=0.35, train_momentum=0.9,
-#                early_stopping=False, mini_batch_size=100)
-#     print
+# Q2
+a3.a3_main(0, n_hid=10, n_iterations=70, lr_net=0.005, train_momentum=0.0, early_stopping=False,
+           mini_batch_size=4)
+
+# In[ ]:
+
+# Q3
+a3.a3_main(0, n_hid=10, n_iterations=70, lr_net=0.5, train_momentum=0.0, early_stopping=False,
+           mini_batch_size=4)
+
+# Question 3-4
+learning_rates = [0.002, 0.01, 0.05, 0.2, 1.0, 5.0, 20.0]
+momentums = [0.0, 0.9]
+for momentum in momentums:
+    for learning_rate in learning_rates:
+        print "Momentum and learning rate are ({0}, {1})".format(momentum, learning_rate)
+        a3.a3_main(0, n_hid=10, n_iterations=70, lr_net=learning_rate, train_momentum=momentum,
+                   early_stopping=False, mini_batch_size=4)
+        print
+
+# In[ ]:
+
+## Question 5
+a3.a3_main(0, n_hid=200, n_iterations=1000, lr_net=0.35, train_momentum=0.9,
+           early_stopping=False, mini_batch_size=100)
+
+# In[ ]:
+
+## Question 6
+a3.a3_main(0, n_hid=200, n_iterations=1000, lr_net=0.35, train_momentum=0.9,
+           early_stopping=True, mini_batch_size=100)
+
+# In[ ]:
+
+# Question 7
+for decay in [0, 0.0001, 0.001, 0.01, 1., 5]:
+    print decay
+    a3.a3_main(decay, n_hid=200, n_iterations=1000, lr_net=0.35, train_momentum=0.9,
+               early_stopping=False, mini_batch_size=100)
+    print
 
 # In[ ]:
 
 ## Question 8
-# for size in [10, 30, 100, 130, 170]:
-#     print size
-#     a3.a3_main(0, n_hid=size, n_iterations=1000, lr_net=0.35, train_momentum=0.9,
-#                early_stopping=False, mini_batch_size=100)
-#     print
+for size in [10, 30, 100, 130, 170]:
+    print size
+    a3.a3_main(0, n_hid=size, n_iterations=1000, lr_net=0.35, train_momentum=0.9,
+               early_stopping=False, mini_batch_size=100)
+    print
 
 # In[ ]:
 
