@@ -13,9 +13,7 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 from numpy.testing import assert_array_equal
-from sklearn.base import BaseEstimator
-
-from courseraneuralnet.utility.utils import loadmat, logistic, log_sum_exp_over_rows
+from utility.utils import loadmat, logistic, log_sum_exp_over_rows
 
 NUM_INPUT_UNITS = 256
 NUM_CLASSES = 10
@@ -23,9 +21,10 @@ NUM_CLASSES = 10
 __all__ = ['A3Run']
 
 
-class FFNeuralNet(BaseEstimator):
-    """Implements Feedforward Neural Network from Assignment 4 trained with Backpropagation.
+class FFNeuralNet:
+    """Implements Feedforward Neural Network from Assignment 3 trained with Backpropagation.
     """
+
     def __init__(self,
                  training_iters,
                  validation_data,
@@ -50,8 +49,6 @@ class FFNeuralNet(BaseEstimator):
             mini_batch_size (int)   : size of training batches
             early_stopping (bool)   : saves model at validation error minimum
         """
-        super(FFNeuralNet, self).__init__()
-
         self.n_classes = n_classes
         self.wd_coeff = wd_coeff
         self.batch_size = mini_batch_size
@@ -240,22 +237,30 @@ class FFNeuralNet(BaseEstimator):
         """
         ret_model = dict()
 
+        # First, feed forward the values, capture the weight input's (class_input and hid_input) and
+        # activations (class_output and hid_output) at every layer.
         hid_input = np.dot(self.model['inputToHid'], inputs)
         hid_output = logistic(hid_input)
         class_input = np.dot(self.model['hidToClass'], hid_output)
         class_prob = np.exp(self.predict_log_proba(class_input))
 
-        # weight decay loss. very straightforward: E = 1/2 * wd_coeffecient * theta^2
+        # Now, back propagate. Compute the delta error (error_deriv) for the output layer (the third layer).
         error_deriv = class_prob - targets
+        # Compute the gradient for the output layer across all training examples then divide
+        # across the training set size for each weight gradient.
         hid_to_output_weights_gradient = np.dot(hid_output, error_deriv.T) / float(np.size(hid_output, axis=1))
         ret_model['hidToClass'] = hid_to_output_weights_gradient.T
 
+        # Compute the delta error (backpropagate_error_deriv) for the hidden layer.
         backpropagate_error_deriv = np.dot(self.model['hidToClass'].T, error_deriv)
+        # Compute the gradient for the hidden layer across all training examples then divide
+        # across the training set size for each weight gradient.
         input_to_hidden_weights_gradient = np.dot(inputs, ((1.0 - hid_output) * hid_output *
                                                            backpropagate_error_deriv).T) / float(np.size(hid_output,
                                                                                                          axis=1))
         ret_model['inputToHid'] = input_to_hidden_weights_gradient.T
 
+        # Add in the weight decay.
         ret_model['inputToHid'] += self.model['inputToHid'] * self.wd_coeff
         ret_model['hidToClass'] += self.model['hidToClass'] * self.wd_coeff
         self.gradient = self.model_to_theta(ret_model)
@@ -311,7 +316,7 @@ class FFNeuralNet(BaseEstimator):
             theta_step = base_theta * 0.0
             theta_step[test_index] = h
             contribution_distances = range(-4, 0) + range(1, 5)
-            contribution_weights = [1./280, -4./105, 1./5, -4./5, 4./5, -1./5, 4./105, -1./280]
+            contribution_weights = [1. / 280, -4. / 105, 1. / 5, -4. / 5, 4. / 5, -1. / 5, 4. / 105, -1. / 280]
             temp = 0.
             for distance, weight in zip(contribution_distances, contribution_weights):
                 self.model = self.theta_to_model(base_theta + theta_step * distance)  # temporarily update model
@@ -341,6 +346,7 @@ class FFNeuralNet(BaseEstimator):
 class A3Run(object):
     """Runs assignment 3.
     """
+
     def __init__(self):
         """Initialize data set and all test cases for assignment.
         """
@@ -372,13 +378,13 @@ class A3Run(object):
 
         # the optimization is finished. Now do some reporting.
         if n_iterations != 0 and nn.training_data_losses and nn.validation_data_losses:
-            plt.hold(True)
             plt.plot(nn.training_data_losses, 'b')
             plt.plot(nn.validation_data_losses, 'r')
             plt.legend(['training', 'validation'])
             plt.ylabel('loss')
             plt.xlabel('iteration number')
-            plt.hold(False)
+            plt.title('learning rate={}, momentum={}, hidden units={}'.format(lr_net, train_momentum, n_hid))
+            plt.show()
 
         for data_name, data_segment in self.data_sets.iteritems():
             print 'The loss on the {0} data is {1}'.format(data_name, nn.loss(data_segment))
@@ -388,3 +394,81 @@ class A3Run(object):
                       'on the {0} data is {1}'.format(data_name, nn.loss(data_segment))
             print 'The classification error rate ' \
                   'on the {0} data is {1}'.format(data_name, nn.classification_performance(data_segment))
+
+
+# Here is the entrance of this script
+# In[ ]:
+
+# In[ ]:
+
+n_hid = 7
+
+# In[ ]:
+
+a3 = A3Run()
+
+# In[ ]:
+
+# Q1
+# a3.a3_main(0, n_hid=0, n_iterations=0, lr_net=0, train_momentum=0, early_stopping=False, mini_batch_size=0)
+#
+# # In[ ]:
+#
+# # Q2
+# a3.a3_main(0, n_hid=10, n_iterations=70, lr_net=0.005, train_momentum=0.0, early_stopping=False,
+#            mini_batch_size=4)
+#
+# # In[ ]:
+#
+# # Q3
+# a3.a3_main(0, n_hid=10, n_iterations=70, lr_net=0.5, train_momentum=0.0, early_stopping=False,
+#            mini_batch_size=4)
+#
+# # Question 3-4
+# learning_rates = [0.002, 0.01, 0.05, 0.2, 1.0, 5.0, 20.0]
+# momentums = [0.0, 0.9]
+# for momentum in momentums:
+#     for learning_rate in learning_rates:
+#         print "Momentum and learning rate are ({0}, {1})".format(momentum, learning_rate)
+#         a3.a3_main(0, n_hid=10, n_iterations=70, lr_net=learning_rate, train_momentum=momentum,
+#                    early_stopping=False, mini_batch_size=4)
+#         print
+#
+# # In[ ]:
+#
+# ## Question 5
+# a3.a3_main(0, n_hid=200, n_iterations=1000, lr_net=0.35, train_momentum=0.9,
+#            early_stopping=False, mini_batch_size=100)
+#
+# # In[ ]:
+#
+# ## Question 6
+# a3.a3_main(0, n_hid=200, n_iterations=1000, lr_net=0.35, train_momentum=0.9,
+#            early_stopping=True, mini_batch_size=100)
+
+# In[ ]:
+
+## Question 7
+# for decay in [0, 0.0001, 0.001, 0.01, 1., 5]:
+#     print decay
+#     a3.a3_main(decay, n_hid=200, n_iterations=1000, lr_net=0.35, train_momentum=0.9,
+#                early_stopping=False, mini_batch_size=100)
+#     print
+
+# In[ ]:
+
+## Question 8
+# for size in [10, 30, 100, 130, 170]:
+#     print size
+#     a3.a3_main(0, n_hid=size, n_iterations=1000, lr_net=0.35, train_momentum=0.9,
+#                early_stopping=False, mini_batch_size=100)
+#     print
+
+# In[ ]:
+
+## Question 9/10
+for size in [18, 37, 83, 113, 189]:
+    print size
+    a3.a3_main(0, n_hid=size, n_iterations=1000, lr_net=0.35, train_momentum=0.9,
+               early_stopping=True, mini_batch_size=100)
+    print
