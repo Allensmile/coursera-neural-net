@@ -9,13 +9,9 @@ Abstracts classifiers developed in the course into, a more pythonic Sklearn fram
 given code.
 """
 
-import os
-import matplotlib.pyplot as plt
-
-import numpy as np
 from sklearn.base import BaseEstimator
 
-from courseraneuralnet.utility.utils import loadmat, logistic, log_sum_exp_over_rows, batches
+from utility.utils import log_sum_exp_over_rows, batches
 
 __all__ = ['A4Run']
 
@@ -23,13 +19,14 @@ __all__ = ['A4Run']
 class A4Helper(object):
     """Helper class for neural network and rbm classifiers, as well as assignment initalization.
     """
+
     def __init__(self):
         """
         Notes:
         * All sizes requested are transposed to account for column matrix as default vector in matlab.
           a4_rand(..) then returns a transposed matrix to have the correct shape.
         """
-        a4_randomness_source = loadmat(os.path.join(os.getcwd(), 'Data/a4_randomness_source.mat'))
+        a4_randomness_source = loadmat(os.path.join(os.getcwd(), 'data/a4_randomness_source.mat'))
         self.randomness_source = a4_randomness_source['randomness_source']
 
     def a4_rand(self, requested_size, seed):
@@ -142,6 +139,7 @@ class A4Helper(object):
 class RBM(BaseEstimator, A4Helper):
     """Implements pre-training for the RBM using CD-1 gradient function.
     """
+
     def __init__(self,
                  training_iters=1,
                  lr_rbm=0.01,
@@ -176,7 +174,7 @@ class RBM(BaseEstimator, A4Helper):
         self.rbm_w = (self.a4_rand(self.model_shape[::-1], np.prod(self.model_shape)) * 2 - 1) * 0.1
         self.gradient = np.zeros(self.model_shape)
 
-    def fit(self, X, y=None):
+    def fit(self, X):
         """Fit a model using one step Contrastive Divergence CD-1.
         """
         self._cd1(visible_data=X)
@@ -234,6 +232,7 @@ class RBM(BaseEstimator, A4Helper):
 class FFNeuralNet(BaseEstimator, A4Helper):
     """Implements Feedforward Neural Network from Assignment 4.
     """
+
     def __init__(self,
                  rbm_w=None,
                  training_iters=1,
@@ -401,6 +400,7 @@ class FFNeuralNet(BaseEstimator, A4Helper):
 class A4Run(A4Helper):
     """Runs assignment 4.
     """
+
     def __init__(self):
         """Initialize data set and all test cases for assignment.
 
@@ -409,7 +409,7 @@ class A4Run(A4Helper):
           a4_rand(..) then returns a transposed matrix to have the correct shape.
         """
         super(A4Run, self).__init__()
-        data = loadmat(os.path.join(os.getcwd(), 'Data/data.mat'))
+        data = loadmat(os.path.join(os.getcwd(), 'data/data_set.mat'))
         self.data_sets = data['data']
 
         self.test_rbm_w = self.a4_rand([256, 100], 0) * 2 - 1
@@ -519,6 +519,7 @@ class A4Run(A4Helper):
         try:
             plt.imshow(to_show, vmin=-extreme, vmax=extreme)
             plt.title('hidden units of the RBM')
+            plt.show()
         except:
             print('Failed to display the RBM. No big deal (you do not need the display to finish the assignment), '
                   'but you are missing out on an interesting picture.')
@@ -540,3 +541,86 @@ class A4Run(A4Helper):
         dec_2_bin = lambda x, n_bits: np.array(["{0:b}".format(val).zfill(n_bits) for val in x])
         binary = np.array([list(val) for val in dec_2_bin(range(pow(2, np.size(w, 0))), np.size(w, 0))], dtype=float)
         return np.log(np.sum(np.prod((np.exp(np.dot(binary, w)) + 1).T, axis=0)))
+
+
+if __name__ == '__main__':
+
+    import numpy as np
+    import os
+
+    import matplotlib.pylab as pylab
+    import matplotlib.pyplot as plt
+
+    pylab.rcParams['figure.figsize'] = 12, 8
+
+    from utility.utils import loadmat, logistic
+
+    # In[ ]:
+
+    a4 = A4Run()
+
+    # In[ ]:
+
+    # Q1
+    a4.a4_main(300, 0, 0, 0)
+
+    # In[ ]:
+
+    # Q1
+    a4.a4_main(300, 0.02, 0.1, 8, show_rbm_weights=False)
+
+    # In[ ]:
+
+    # Q2
+    a4.describe_matrix(a4.visible_state_to_hidden_probabilities(a4.test_rbm_w, a4.data_1_case))
+    a4.describe_matrix(a4.visible_state_to_hidden_probabilities(a4.test_rbm_w, a4.data_10_cases))
+    a4.describe_matrix(a4.visible_state_to_hidden_probabilities(a4.test_rbm_w, a4.data_37_cases))
+
+    # In[ ]:
+
+    # Q3
+    a4.describe_matrix(a4.hidden_state_to_visible_probabilities(a4.test_rbm_w, a4.test_hidden_state_1_case))
+    a4.describe_matrix(a4.hidden_state_to_visible_probabilities(a4.test_rbm_w, a4.test_hidden_state_10_cases))
+    a4.describe_matrix(a4.hidden_state_to_visible_probabilities(a4.test_rbm_w, a4.test_hidden_state_37_cases))
+
+    # In[ ]:
+
+    # Q4
+    print a4.configuration_goodness(a4.test_rbm_w, a4.data_1_case, a4.test_hidden_state_1_case)
+    print a4.configuration_goodness(a4.test_rbm_w, a4.data_10_cases, a4.test_hidden_state_10_cases)
+    print a4.configuration_goodness(a4.test_rbm_w, a4.data_37_cases, a4.test_hidden_state_37_cases)
+
+    # In[ ]:
+
+    # Q5
+    a4.describe_matrix(a4.configuration_goodness_gradient(a4.data_1_case, a4.test_hidden_state_1_case))
+    a4.describe_matrix(a4.configuration_goodness_gradient(a4.data_10_cases, a4.test_hidden_state_10_cases))
+    a4.describe_matrix(a4.configuration_goodness_gradient(a4.data_37_cases, a4.test_hidden_state_37_cases))
+
+    # In[ ]:
+
+    # Q6/7
+    a4.describe_matrix(a4.train_rbm_test_cases(a4.data_1_case))
+    print
+    a4.describe_matrix(a4.train_rbm_test_cases(a4.data_1_case))
+    print
+    a4.describe_matrix(a4.train_rbm_test_cases(a4.data_1_case))
+
+    # In[ ]:
+
+    # Q8
+    lr = .005
+    # all_lr = [lr/4, lr/2, lr/1.5, lr/1.25, lr*1.25, lr*1.5, lr*2, lr*4, lr*6, lr*8, lr*10]
+    all_lr = [lr * 15, lr * 20, lr * 25, lr * 27]
+    for lr_ in all_lr:
+        print "LEARNING RATE: ", lr_
+        # a4.a4_main(300, .02, lr_, 1000, show_rbm_weights=True)
+        print
+
+    # In[ ]:
+
+    # Q10
+    a4.question_10()
+
+
+    # In[ ]:
